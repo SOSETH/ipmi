@@ -1,0 +1,10 @@
+---
+# SOL default configuration.
+sol_baudrate: 115200
+sol_port: ttyS1
+sol_port_no: 1
+sol_data_bits: 8
+sol_parity_bits: n
+sol_parity_bits_grub: 'no'
+sol_stop_bits: 1
+sol_flow_control: r

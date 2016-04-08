@@ -1,3 +1,10 @@
 ---
- - name: update-grub
-   shell: update-grub
+  - name: update-grub
+    shell: update-grub
+
+  - name: restart-manual-serial
+    command: systemctl daemon-reload
+    notify: restart-manual-serial-2
+
+  - name: restart-manual-serial-2
+    service: name=seria-getty@{{ sol_port }} state=restarted

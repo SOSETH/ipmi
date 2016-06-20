@@ -7,4 +7,6 @@
     notify: restart-manual-serial-2
 
   - name: restart-manual-serial-2
-    service: name=seria-getty@{{ sol_port }} state=restarted
+    service:
+      name: seria-getty@{{ sol_port }}
+      state: restarted

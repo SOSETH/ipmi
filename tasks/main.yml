@@ -5,7 +5,7 @@
     state: present
     backrefs: yes
     regexp: '^GRUB_CMDLINE_LINUX=\"(?!(.*console=.*))(?P<ex>.*)\"$'
-    line: 'GRUB_CMDLINE_LINUX=\"console=tty0 console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }} \g<ex>\"'
+    line: 'GRUB_CMDLINE_LINUX="console=tty0 console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }} \g<ex>"'
   notify: update-grub
   when: sol_enable_systemd
 

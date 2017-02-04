@@ -1,4 +1,4 @@
-# Role: sol
+# Role: ipmi
 
 Configuration of Serial-over-LAN for VSOS use.
 We configure SOL with the specified baud rate(115200 per default) on the specific serial port (ttyS1 per default) and enable output of kernel messages and getty on this device. This is done by changing the CMDLINE in the default GRUB configuration!

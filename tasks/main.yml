@@ -1,4 +1,28 @@
 ---
+- name: Install ipmitools
+  apt:
+    name: ipmitool
+    state: present
+    update_cache: yes
+    cache_valid_time: 1800
+
+- name: Load kernel modules on boot
+  template:
+    src: etc_modules-load.d_ipmi.conf.j2
+    dest: /etc/modules-load.d/ipmi.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Ensure kernel modules are loaded
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+   - ipmi_si
+   - ipmi_devintf
+   - ipmi_poweroff
+
 - name: Enable serial output in default cmdline
   lineinfile:
     dest: /etc/default/grub

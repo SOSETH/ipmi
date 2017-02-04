@@ -1,0 +1,52 @@
+---
+- name: Enable serial output in default cmdline
+  lineinfile:
+    dest: /etc/default/grub
+    state: present
+    backrefs: yes
+    regexp: '^GRUB_CMDLINE_LINUX=\"(?!(.*console=.*))(?P<ex>.*)\"$'
+    line: 'GRUB_CMDLINE_LINUX="console=tty0 console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }} \g<ex>"'
+  notify: update-grub
+  when: sol_enable_systemd
+
+- name: Disable serial output in default cmdline
+  replace:
+    dest: /etc/default/grub
+    regexp: '(.*)console=tty0 console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }}(.*)'
+    replace: '\1\2'
+    backup: yes
+  notify: update-grub
+  when: not sol_enable_systemd
+
+- name: Configure serial output for grub menu
+  lineinfile:
+    dest: /etc/default/grub
+    state: present
+    regexp: '^GRUB_SERIAL_COMMAND.*'
+    line: 'GRUB_SERIAL_COMMAND="serial --unit={{ sol_port_no }} --speed={{ sol_baudrate }} --word={{ sol_data_bits }} --parity={{ sol_parity_bits_grub }} --stop={{ sol_stop_bits }}"'
+  notify: update-grub
+
+- name: Enable serial output for grub menu
+  lineinfile:
+    dest: /etc/default/grub
+    state: present
+    regexp: '^GRUB_TERMINAL.*'
+    line: 'GRUB_TERMINAL="serial console"'
+  notify: update-grub
+
+- name: Copy manual serial console service
+  template:
+    src: getty.j2
+    dest: /etc/systemd/system/seria-getty@{{ sol_port }}.service
+    owner: root
+    group: root
+    mode: 0444
+  when: not sol_enable_systemd
+  notify: restart-manual-serial
+
+- name: Activate manual serial console service
+  file:
+    src: /etc/systemd/system/seria-getty@{{ sol_port }}.service
+    dest: /etc/systemd/system/getty.target.wants/seria-getty@{{ sol_port }}.service
+    state: link
+  when: not sol_enable_systemd

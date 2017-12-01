@@ -1,5 +1,6 @@
 ---
 - name: Install ipmitools
+  become: True
   apt:
     name: ipmitool
     state: present
@@ -7,6 +8,7 @@
     cache_valid_time: 1800
 
 - name: Load kernel modules on boot
+  become: True
   template:
     src: etc_modules-load.d_ipmi.conf.j2
     dest: /etc/modules-load.d/ipmi.conf
@@ -15,6 +17,7 @@
     mode: 0644
 
 - name: Ensure kernel modules are loaded
+  become: True
   modprobe:
     name: "{{ item }}"
     state: present

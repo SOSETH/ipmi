@@ -26,4 +26,4 @@
    - ipmi_devintf
    - ipmi_poweroff
 
-- include: sol.yml
+- import_tasks: sol.yml

@@ -6,7 +6,7 @@
     state: present
     backrefs: yes
     regexp: '^GRUB_CMDLINE_LINUX=\"(?!(.*console=.*))(?P<ex>.*)\"$'
-    line: 'GRUB_CMDLINE_LINUX="console=tty0 console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }} \g<ex>"'
+    line: 'GRUB_CMDLINE_LINUX="console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }} console=tty0 \g<ex>"'
   notify: update-grub
   when: sol_enable_systemd
 
@@ -14,7 +14,7 @@
   become: True
   replace:
     dest: /etc/default/grub
-    regexp: '(.*)console=tty0 console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }}(.*)'
+    regexp: '(.*)console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }} console=tty0(.*)'
     replace: '\1\2'
     backup: yes
   notify: update-grub
@@ -56,3 +56,12 @@
     dest: /etc/systemd/system/getty.target.wants/seria-getty@{{ sol_port }}.service
     state: link
   when: not sol_enable_systemd
+
+- name: Disable manual serial console service
+  systemd: name=seria-getty@{{ sol_port }}.service state=stopped enabled=False
+  failed_when: False
+  when: sol_enable_systemd
+
+- name: Remove manual serial console service file
+  file: dest=/etc/systemd/system/seria-getty@{{ sol_port }}.service state=absent
+  when: sol_enable_systemd

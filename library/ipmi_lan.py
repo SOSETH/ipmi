@@ -50,7 +50,6 @@ EXAMPLES = '''
       ip: 172.31.0.210
       netmask: 255.255.255.0
       gateway: 172.31.0.1
-      dns: 172.31.0.1
       vlan: none
 
 # Enable DHCP instead

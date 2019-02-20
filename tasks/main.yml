@@ -26,4 +26,26 @@
    - ipmi_devintf
    - ipmi_poweroff
 
+- name: Configure IPMI IP
+  become: True
+  when: ipmiconfig is defined
+  ipmi_lan:
+    channel: "{{ ipmiconfig.lan.channel }}"
+    config:
+      ip: "{{ ipmiconfig.lan.ip }}"
+      netmask: "{{ ipmiconfig.lan.netmask }}"
+      gateway: "{{ ipmiconfig.lan.gateway }}"
+
+- name: Configure IPMI users
+  become: True
+  when: ipmiconfig is defined
+  ipmi_user:
+    user: "{{ item.name }}"
+    password: "{{ item.password }}"
+    state: present
+    privileges: "{{ item.privileges }}"
+    channel: "{{ item.channel }}"
+  with_items: "{{ ipmiconfig.users }}"
+  no_log: True
+
 - import_tasks: sol.yml

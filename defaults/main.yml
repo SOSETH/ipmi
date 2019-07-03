@@ -8,4 +8,3 @@ sol_parity_bits: n
 sol_parity_bits_grub: 'no'
 sol_stop_bits: 1
 sol_flow_control: r
-sol_enable_systemd: True

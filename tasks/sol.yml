@@ -8,17 +8,6 @@
     regexp: '^GRUB_CMDLINE_LINUX=\"(?!(.*console=.*))(?P<ex>.*)\"$'
     line: 'GRUB_CMDLINE_LINUX="console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }} console=tty0 \g<ex>"'
   notify: update-grub
-  when: sol_enable_systemd
-
-- name: Disable serial output in default cmdline
-  become: True
-  replace:
-    dest: /etc/default/grub
-    regexp: '(.*)console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }} console=tty0(.*)'
-    replace: '\1\2'
-    backup: yes
-  notify: update-grub
-  when: not sol_enable_systemd
 
 - name: Configure serial output for grub menu
   become: True
@@ -37,31 +26,3 @@
     regexp: '^GRUB_TERMINAL.*'
     line: 'GRUB_TERMINAL="serial console"'
   notify: update-grub
-
-- name: Copy manual serial console service
-  become: True
-  template:
-    src: getty.j2
-    dest: /etc/systemd/system/seria-getty@{{ sol_port }}.service
-    owner: root
-    group: root
-    mode: 0444
-  when: not sol_enable_systemd
-  notify: restart-manual-serial
-
-- name: Activate manual serial console service
-  become: True
-  file:
-    src: /etc/systemd/system/seria-getty@{{ sol_port }}.service
-    dest: /etc/systemd/system/getty.target.wants/seria-getty@{{ sol_port }}.service
-    state: link
-  when: not sol_enable_systemd
-
-- name: Disable manual serial console service
-  systemd: name=seria-getty@{{ sol_port }}.service state=stopped enabled=False
-  failed_when: False
-  when: sol_enable_systemd
-
-- name: Remove manual serial console service file
-  file: dest=/etc/systemd/system/seria-getty@{{ sol_port }}.service state=absent
-  when: sol_enable_systemd

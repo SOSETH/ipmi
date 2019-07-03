@@ -66,7 +66,6 @@ message:
     description: The output message that the sample module generates
 '''
 
-
 """
 Set in Progress         : Set Complete
 Auth Type Support       : NONE MD2 MD5 PASSWORD 
@@ -100,7 +99,6 @@ Bad Password Threshold  : Not Available
 """
 from ansible.module_utils.basic import AnsibleModule
 
-
 ATTRIBUTE_TO_IPMITOOL_ATTRIBUTE = {
     'ip': 'ipaddr',
     'netmask': 'netmask',
@@ -109,7 +107,7 @@ ATTRIBUTE_TO_IPMITOOL_ATTRIBUTE = {
 }
 
 
-class LANChannel():
+class LANChannel:
     def __init__(self, module, channel_id, check_mode):
         self.dhcp = False
         self.ip = None
@@ -123,7 +121,8 @@ class LANChannel():
         self.check_mode = check_mode
 
     def load_channel_inband(self):
-        _, result, _ = self.module.run_command(["sudo", "ipmitool", "lan", "print", str(self.channel_id)], check_rc=True)
+        _, result, _ = self.module.run_command(["sudo", "ipmitool", "lan", "print", str(self.channel_id)],
+                                               check_rc=True)
         self._parse_lan_status(result)
 
     def _parse_lan_status(self, status_str):
@@ -167,18 +166,16 @@ class LANChannel():
                 raise NotImplemented
 
 
-def run_module():
-    module_args = dict(
-        channel=dict(type='int', required=False, default=1),
-        config=dict(type='dict', required=True)
-    )
-    result = dict(
-        changed=False
-    )
+def main():
     module = AnsibleModule(
-        argument_spec=module_args,
+        argument_spec=dict(
+            channel=dict(type='int', required=False, default=1),
+            config=dict(type='dict', required=True)
+        ),
         supports_check_mode=False
+
     )
+    result = {'changed': False}
 
     # Load current channel status
     obj = LANChannel(module, module.params['channel'], module.check_mode)
@@ -197,10 +194,6 @@ def run_module():
 
     result['changed'] = obj.changed
     module.exit_json(**result)
-
-
-def main():
-    run_module()
 
 
 if __name__ == '__main__':

@@ -222,7 +222,7 @@ def run_module():
     )
     module = AnsibleModule(
         argument_spec=module_args,
-        supports_check_mode=False
+        supports_check_mode=True
     )
 
     # Load current channel status

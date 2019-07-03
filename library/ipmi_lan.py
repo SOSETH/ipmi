@@ -109,12 +109,8 @@ ATTRIBUTE_TO_IPMITOOL_ATTRIBUTE = {
 
 class LANChannel:
     def __init__(self, module, channel_id, check_mode):
-        self.dhcp = False
-        self.ip = None
-        self.netmask = None
-        self.gateway = None
-        self.vlan = None
-        self.mac = None
+        self.attrs = {}
+        self.diff = {'before': {}, 'after': {}}
         self.channel_id = channel_id
         self.changed = False
         self.module = module
@@ -125,20 +121,22 @@ class LANChannel:
                                                check_rc=True)
         self._parse_lan_status(result)
 
+        return self.attrs
+
     def _parse_lan_status(self, status_str):
         for row in status_str.split('\n'):
             if row.startswith("IP Address Source"):
-                self.dhcp = not row.endswith("Static Address")
+                self.attrs['dhcp'] = not row.endswith("Static Address")
             if row.startswith("IP Address  "):
-                self.ip = row.split(':')[1].strip()
+                self.attrs['ip'] = row.split(':')[1].strip()
             if row.startswith("Subnet Mask"):
-                self.netmask = row.split(':')[1].strip()
+                self.attrs['netmask'] = row.split(':')[1].strip()
             if row.startswith("Default Gateway IP"):
-                self.gateway = row.split(':')[1].strip()
+                self.attrs['gateway'] = row.split(':')[1].strip()
             if row.startswith("802.1q VLAN ID"):
-                self.vlan = row.split(':')[1].strip().replace('Disabled', 'none')
+                self.attrs['vlan'] = row.split(':')[1].strip().replace('Disabled', 'none')
             if row.startswith("MAC Address"):
-                self.mac = row.split(':', 1)[1].strip()
+                self.attrs['mac'] = row.split(':', 1)[1].strip()
 
     def _set_channel_attribute(self, attribute, value):
         if not self.check_mode:
@@ -151,19 +149,21 @@ class LANChannel:
             self.module.run_command(command, check_rc=True)
 
     def set_attribute(self, attribute, value):
-        attribute = str(attribute)
         if not isinstance(value, bool):
             value = str(value)
-        current_value = getattr(self, attribute)
+
+        current_value = self.attrs[attribute]
         if current_value != value:
             if attribute in ATTRIBUTE_TO_IPMITOOL_ATTRIBUTE.keys():
                 self._set_channel_attribute(ATTRIBUTE_TO_IPMITOOL_ATTRIBUTE[attribute], value)
-                self.changed = True
             elif attribute is 'dhcp':
                 self._set_channel_attribute('ipsrc', 'dhcp' if value else 'static')
-                self.changed = True
             else:
                 raise NotImplemented
+
+            self.changed = True
+            self.diff['before'][attribute] = current_value
+            self.diff['after'][attribute] = value
 
 
 def main():
@@ -172,9 +172,9 @@ def main():
             channel=dict(type='int', required=False, default=1),
             config=dict(type='dict', required=True)
         ),
-        supports_check_mode=False
-
+        supports_check_mode=True
     )
+
     result = {'changed': False}
 
     # Load current channel status
@@ -193,6 +193,9 @@ def main():
         obj.set_attribute('dhcp', module.params['config']['dhcp'])
 
     result['changed'] = obj.changed
+    if module._diff:
+        result['diff'] = obj.diff
+
     module.exit_json(**result)
 
 

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # Copyright: (c) 2019, Maximilian Falkenstein <maximilian.falkenstein@sos.ethz.ch>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -249,3 +249,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

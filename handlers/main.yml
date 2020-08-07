@@ -1,12 +1,15 @@
 ---
   - name: update-grub
+    become: True
     shell: update-grub
 
   - name: restart-manual-serial
+    become: True
     command: systemctl daemon-reload
     notify: restart-manual-serial-2
 
   - name: restart-manual-serial-2
+    become: True
     service:
       name: seria-getty@{{ sol_port }}
       state: restarted

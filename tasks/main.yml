@@ -1,33 +1,33 @@
 ---
 - name: Install ipmitools
-  become: True
-  apt:
+  become: true
+  ansible.builtin.apt:
     name: ipmitool
     state: present
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 1800
 
 - name: Load kernel modules on boot
-  become: True
-  template:
+  become: true
+  ansible.builtin.template:
     src: etc_modules-load.d_ipmi.conf.j2
     dest: /etc/modules-load.d/ipmi.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
 
 - name: Ensure kernel modules are loaded
-  become: True
-  modprobe:
+  become: true
+  community.general.modprobe:
     name: "{{ item }}"
     state: present
   with_items:
-   - ipmi_si
-   - ipmi_devintf
-   - ipmi_poweroff
+    - ipmi_si
+    - ipmi_devintf
+    - ipmi_poweroff
 
 - name: Configure IPMI IP
-  become: True
+  become: true
   when: ipmiconfig is defined
   ipmi_lan:
     channel: "{{ ipmiconfig.lan.channel }}"
@@ -37,7 +37,7 @@
       gateway: "{{ ipmiconfig.lan.gateway }}"
 
 - name: Configure IPMI users
-  become: True
+  become: true
   when: ipmiconfig is defined
   ipmi_user:
     user: "{{ item.name }}"
@@ -46,6 +46,7 @@
     privileges: "{{ item.privileges }}"
     channel: "{{ item.channel }}"
   with_items: "{{ ipmiconfig.users }}"
-  no_log: True
+  no_log: true
 
-- import_tasks: sol.yml
+- name: Configure SOL
+  ansible.builtin.import_tasks: sol.yml

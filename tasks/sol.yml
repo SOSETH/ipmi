@@ -1,28 +1,32 @@
 ---
 - name: Enable serial output in default cmdline
-  become: True
-  lineinfile:
+  become: true
+  ansible.builtin.lineinfile:
     dest: /etc/default/grub
     state: present
-    backrefs: yes
-    regexp: '^GRUB_CMDLINE_LINUX=\"(?!(.*console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }}.*))((.*console=.*\s*console=tty0\s+)*)(?P<ex>.*)\"$'
+    backrefs: true
+    regexp: >-
+      ^GRUB_CMDLINE_LINUX=\"(?!(.*console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }}.*))
+      ((.*console=.*\s*console=tty0\s+)*)(?P<ex>.*)\"$
     line: 'GRUB_CMDLINE_LINUX="console={{ sol_port }},{{ sol_baudrate }}{{ sol_parity_bits }}{{ sol_data_bits }}{{ sol_flow_control }} console=tty0 \g<ex>"'
-  notify: update-grub
+  notify: Update grub
 
 - name: Configure serial output for grub menu
-  become: True
-  lineinfile:
+  become: true
+  ansible.builtin.lineinfile:
     dest: /etc/default/grub
     state: present
     regexp: '^GRUB_SERIAL_COMMAND.*'
-    line: 'GRUB_SERIAL_COMMAND="serial --unit={{ sol_port_no }} --speed={{ sol_baudrate }} --word={{ sol_data_bits }} --parity={{ sol_parity_bits_grub }} --stop={{ sol_stop_bits }}"'
-  notify: update-grub
+    line: >-
+      GRUB_SERIAL_COMMAND="serial --unit={{ sol_port_no }} --speed={{ sol_baudrate }} --word={{ sol_data_bits }} --parity={{ sol_parity_bits_grub }}
+      --stop={{ sol_stop_bits }}"
+  notify: Update grub
 
 - name: Enable serial output for grub menu
-  become: True
-  lineinfile:
+  become: true
+  ansible.builtin.lineinfile:
     dest: /etc/default/grub
     state: present
     regexp: '^GRUB_TERMINAL.*'
     line: 'GRUB_TERMINAL="serial console"'
-  notify: update-grub
+  notify: Update grub

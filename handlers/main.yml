@@ -1,15 +1,17 @@
 ---
-  - name: update-grub
-    become: True
-    shell: update-grub
+- name: Update grub
+  become: true
+  ansible.builtin.command: update-grub
+  changed_when: false
 
-  - name: restart-manual-serial
-    become: True
-    command: systemctl daemon-reload
-    notify: restart-manual-serial-2
+- name: Restart manual serial
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+  notify: Restart manual serial 2
 
-  - name: restart-manual-serial-2
-    become: True
-    service:
-      name: seria-getty@{{ sol_port }}
-      state: restarted
+- name: Restart manual serial 2
+  become: true
+  ansible.builtin.service:
+    name: seria-getty@{{ sol_port }}
+    state: restarted
